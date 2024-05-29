@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "593079698028",
+    "project_id": "codetrackio",
+    "storage_bucket": "codetrackio.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:593079698028:android:d88e145ddd249fed420e49",
+        "android_client_info": {
+          "package_name": "com.example.codetrackio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHvI78k5cpupRKBPtxCYf_vQ_y-2TZKjI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
