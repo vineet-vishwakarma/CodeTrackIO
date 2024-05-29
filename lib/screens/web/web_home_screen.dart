@@ -12,7 +12,6 @@ import 'package:codetrackio/widgets/difficulty_tile.dart';
 import 'package:codetrackio/widgets/language_chip.dart';
 import 'package:codetrackio/widgets/platform_card.dart';
 import 'package:codetrackio/widgets/platform_name.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
@@ -51,10 +50,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
         fetchLeetcode();
       } else {
-        Fluttertoast.showToast(msg: 'Username not found');
+        toast('Username not found');
       }
     } on Exception catch (e) {
-      Fluttertoast.showToast(msg: e.toString());
+      toast(e.toString());
     }
   }
 
@@ -74,10 +73,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
         fetchGFG();
       } else {
-        Fluttertoast.showToast(msg: 'Username not found');
+        toast('Username not found');
       }
     } on Exception catch (e) {
-      Fluttertoast.showToast(msg: e.toString());
+      toast(e.toString());
     }
   }
 
@@ -124,7 +123,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         throw Exception('Error');
       }
     } on Exception catch (e) {
-      Fluttertoast.showToast(msg: e.toString(), timeInSecForIosWeb: 100);
+      // Fluttertoast.showToast(msg: e.toString(), timeInSecForIosWeb: 100);
+      toast(e.toString());
     }
   }
 
@@ -192,7 +192,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         throw Exception('Failed to load data');
       }
     } on Exception catch (e) {
-      Fluttertoast.showToast(msg: e.toString(), timeInSecForIosWeb: 100);
+      toast(e.toString());
     }
   }
 

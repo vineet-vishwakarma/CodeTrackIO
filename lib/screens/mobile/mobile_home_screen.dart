@@ -13,7 +13,6 @@ import 'package:codetrackio/widgets/platform_name.dart';
 import 'package:codetrackio/widgets/text_input_field.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
@@ -57,10 +56,10 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
         fetchLeetcode();
       } else {
-        Fluttertoast.showToast(msg: 'Username not found');
+        toast('Username not found');
       }
     } on Exception catch (e) {
-      Fluttertoast.showToast(msg: e.toString());
+      toast(e.toString());
     }
   }
 
@@ -83,10 +82,10 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
         fetchGFG();
       } else {
-        Fluttertoast.showToast(msg: 'Username not found');
+        toast('Username not found');
       }
     } on Exception catch (e) {
-      Fluttertoast.showToast(msg: e.toString());
+      toast(e.toString());
     }
   }
 
@@ -159,12 +158,14 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           body: jsonEncode({'username': username}),
         );
       } else {
-        response = await http
-            .get(Uri.parse('https://www.geeksforgeeks.org/user/$username/'));
+        response = await http.get(
+            Uri.parse('https://www.geeksforgeeks.org/user/$username/'),
+            headers: {'Content-Type': 'application/json'});
       }
 
       if (response.statusCode == 200) {
-        final document = parser.parse(jsonDecode(response.body));
+        final res = jsonDecode(response.body);
+        final document = parser.parse(res);
 
         final question = document.querySelector(
             '#comp > div.AuthLayout_outer_div__20rxz > div > div.AuthLayout_head_content__ql3r2 > div > div > div.solvedProblemContainer_head__ZyIn0 > div.solvedProblemSection_head__VEUg4 > div.problemNavbar_head__cKSRi');
@@ -204,7 +205,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         throw Exception('Failed to load data');
       }
     } on Exception catch (e) {
-      Fluttertoast.showToast(msg: e.toString());
+      if (kDebugMode) {
+        print(e.toString());
+      }
     }
   }
 

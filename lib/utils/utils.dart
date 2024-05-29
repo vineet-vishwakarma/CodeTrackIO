@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void nextScreen(context, page) {
   Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+}
+
+toast(String msg) {
+  return Fluttertoast.showToast(
+    msg: msg,
+    webBgColor: "linear-gradient(#24222a,#24222a)",
+    timeInSecForIosWeb: 3,
+    backgroundColor: const Color.fromRGBO(36, 34, 42, 255),
+  );
 }
 
 h1Style() {
