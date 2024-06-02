@@ -38,7 +38,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       //     'https://leetcode.com/graphql?query=query%20{%20userContestRanking(username:%20%20%22$username%22)%20{%20attendedContestsCount%20rating%20globalRanking%20totalParticipants%20topPercentage%20}}'));
 
       final response = await http.post(
-          Uri.parse('http://localhost:3000/fetchleetcode'),
+          // Uri.parse('http://localhost:3000/fetchleetcode'),
+          Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
           body: jsonEncode({'username': username}),
           headers: {"Content-Type": "application/json"});
 
@@ -62,7 +63,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       // final response = await http
       //     .get(Uri.parse('https://www.geeksforgeeks.org/user/$username/'));
       final response = await http.post(
-          Uri.parse('http://localhost:3000/fetchgfg'),
+          // Uri.parse('http://localhost:3000/fetchgfg'),
+          Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
           body: jsonEncode({'username': username}),
           headers: {"Content-Type": "application/json"});
       if (response.statusCode == 200) {
@@ -88,7 +90,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     // );
     try {
       final response = await http.post(
-          Uri.parse('http://localhost:3000/fetchleetcode'),
+          // Uri.parse('http://localhost:3000/fetchleetcode'),
+          Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
           body: jsonEncode({'username': username}),
           headers: {"Content-Type": "application/json"});
       if (response.statusCode == 200) {
@@ -146,7 +149,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       //     .get(Uri.parse('https://www.geeksforgeeks.org/user/$username/'));
 
       final response = await http.post(
-        Uri.parse('http://localhost:3000/fetchgfg'),
+        Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'username': username}),
       );
@@ -285,6 +288,28 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
     updatePlatformData(platformData);
 
+    int easy = leetcodeEasy + gfgEasy;
+    int medium = leetcodeMedium + gfgMedium;
+    int hard = leetcodeHard + gfgHard;
+
+    // int toatalEasy = leetcodeTotalEasy + gfgTotalEasy;
+    // int totalMedium = leetcodeTotalMedium + gfgTotalMedium;
+    // int totalHard = leetcodeTotalHard + gfgTotalHard;
+
+    int totalQuestions = leetcodeTotalEasy +
+        leetcodeTotalMedium +
+        leetcodeTotalHard +
+        gfgTotalEasy +
+        gfgTotalMedium +
+        gfgTotalHard;
+
+    double easyProgress = (totalQuestions == 0) ? 0 : easy / totalQuestions;
+    double mediumProgress =
+        (totalQuestions == 0) ? 0 : easyProgress + (medium / totalQuestions);
+    double hardProgress = (totalQuestions == 0)
+        ? 0
+        : easyProgress + mediumProgress + (hard / totalQuestions);
+
     return Scaffold(
       appBar: const CustomAppbar(),
       body: SingleChildScrollView(
@@ -383,26 +408,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   child: CircularProgressIndicator(
                                     strokeWidth: 5,
                                     backgroundColor: Colors.grey,
-                                    value: (leetcodeTotalHard + gfgTotalHard) ==
-                                            0
-                                        ? 0
-                                        : (leetcodeHard + gfgHard) /
-                                                        (leetcodeTotalHard +
-                                                            gfgTotalHard) +
-                                                    (leetcodeTotalMedium +
-                                                        gfgTotalMedium) ==
-                                                0
-                                            ? 0
-                                            : (leetcodeMedium + gfgMedium) /
-                                                            (leetcodeTotalMedium +
-                                                                gfgTotalMedium) +
-                                                        (gfgTotalEasy +
-                                                            leetcodeTotalEasy) ==
-                                                    0
-                                                ? 0
-                                                : (leetcodeEasy + gfgEasy) /
-                                                    (gfgTotalEasy +
-                                                        leetcodeTotalEasy),
+                                    value: hardProgress,
+                                    // (totalHard) == 0
+                                    //     ? 0
+                                    //     : (hard) / (totalHard) +
+                                    //                 (totalMedium) ==
+                                    //             0
+                                    //         ? 0
+                                    //         : (medium) / (totalMedium) +
+                                    //                     (toatalEasy) ==
+                                    //                 0
+                                    //             ? 0
+                                    //             : (easy) / (toatalEasy)
+                                    // ,
                                     strokeCap: StrokeCap.round,
                                     valueColor:
                                         const AlwaysStoppedAnimation<Color>(
@@ -414,19 +432,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   width: 100,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 5,
-                                    value: (gfgTotalEasy + leetcodeTotalEasy) ==
-                                            0
-                                        ? 0
-                                        : (leetcodeMedium + gfgMedium) /
-                                                        (leetcodeTotalMedium +
-                                                            gfgTotalMedium) +
-                                                    (gfgTotalEasy +
-                                                        leetcodeTotalEasy) ==
-                                                0
-                                            ? 0
-                                            : (leetcodeEasy + gfgEasy) /
-                                                (gfgTotalEasy +
-                                                    leetcodeTotalEasy),
+                                    value: mediumProgress,
+                                    // (totalMedium) == 0
+                                    //     ? 0
+                                    //     : medium / (totalMedium) +
+                                    //                 (toatalEasy) ==
+                                    //             0
+                                    //         ? 0
+                                    //         : (easy) / (toatalEasy),
+
                                     strokeCap: StrokeCap.round,
                                     valueColor:
                                         const AlwaysStoppedAnimation<Color>(
@@ -438,11 +452,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   width: 100,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 5,
-                                    value: (gfgTotalEasy + leetcodeTotalEasy) ==
-                                            0
-                                        ? 0
-                                        : (leetcodeEasy + gfgEasy) /
-                                            (gfgTotalEasy + leetcodeTotalEasy),
+                                    value: easyProgress,
+                                    // (toatalEasy) == 0
+                                    //     ? 0
+                                    //     : (easy) / (toatalEasy),
                                     strokeCap: StrokeCap.round,
                                     valueColor:
                                         const AlwaysStoppedAnimation<Color>(
@@ -604,20 +617,33 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   )
                                 : leetcodeData.isEmpty
                                     ? const PlatformLoader()
-                                    : PlatformCard(
-                                        size: size,
-                                        totalQuestions: leetcodeTotalHard +
-                                            leetcodeTotalEasy +
-                                            leetcodeTotalMedium,
-                                        easyQuestionSolved: leetcodeData[1]
-                                            ['count'],
-                                        mediumQuestionSolved: leetcodeData[2]
-                                            ['count'],
-                                        hardQuestionSolved: leetcodeData[3]
-                                            ['count'],
-                                        easyQuestions: leetcodeTotalEasy,
-                                        mediumQuestions: leetcodeTotalMedium,
-                                        hardQuestions: leetcodeTotalHard,
+                                    : Column(
+                                        children: [
+                                          Center(
+                                            child: Text(
+                                              'Username: $leetcodeUsername',
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 25),
+                                          PlatformCard(
+                                            size: size,
+                                            totalQuestions: leetcodeTotalHard +
+                                                leetcodeTotalEasy +
+                                                leetcodeTotalMedium,
+                                            easyQuestionSolved: leetcodeData[1]
+                                                ['count'],
+                                            mediumQuestionSolved:
+                                                leetcodeData[2]['count'],
+                                            hardQuestionSolved: leetcodeData[3]
+                                                ['count'],
+                                            easyQuestions: leetcodeTotalEasy,
+                                            mediumQuestions:
+                                                leetcodeTotalMedium,
+                                            hardQuestions: leetcodeTotalHard,
+                                          ),
+                                        ],
                                       ),
                           ],
                         ),
@@ -673,19 +699,31 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   )
                                 : gfgData.isEmpty
                                     ? const PlatformLoader()
-                                    : PlatformCard(
-                                        size: size,
-                                        totalQuestions: gfgTotalHard +
-                                            gfgTotalMedium +
-                                            gfgTotalEasy,
-                                        easyQuestionSolved: gfgData[0] +
-                                            gfgData[1] +
-                                            gfgData[2],
-                                        mediumQuestionSolved: gfgData[3],
-                                        hardQuestionSolved: gfgData[4],
-                                        easyQuestions: gfgTotalEasy,
-                                        mediumQuestions: gfgTotalMedium,
-                                        hardQuestions: gfgTotalHard,
+                                    : Column(
+                                        children: [
+                                          Center(
+                                            child: Text(
+                                              'Username: $gfgUsername',
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 25),
+                                          PlatformCard(
+                                            size: size,
+                                            totalQuestions: gfgTotalHard +
+                                                gfgTotalMedium +
+                                                gfgTotalEasy,
+                                            easyQuestionSolved: gfgData[0] +
+                                                gfgData[1] +
+                                                gfgData[2],
+                                            mediumQuestionSolved: gfgData[3],
+                                            hardQuestionSolved: gfgData[4],
+                                            easyQuestions: gfgTotalEasy,
+                                            mediumQuestions: gfgTotalMedium,
+                                            hardQuestions: gfgTotalHard,
+                                          ),
+                                        ],
                                       ),
                           ],
                         ),

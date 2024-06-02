@@ -40,7 +40,8 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       // final
       if (kIsWeb) {
         response = await http.post(
-            Uri.parse('http://localhost:3000/fetchleetcode'),
+            // Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
+            Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
             body: jsonEncode({'username': username}),
             headers: {"Content-Type": "application/json"});
       } else {
@@ -67,7 +68,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
     try {
       final dynamic response;
       if (kIsWeb) {
-        response = await http.post(Uri.parse('http://localhost:3000/fetchgfg'),
+        response = await http.post(Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
             body: jsonEncode({'username': username}),
             headers: {"Content-Type": "application/json"});
       } else {
@@ -94,7 +95,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
     final dynamic response;
     if (kIsWeb) {
       response = await http.post(
-          Uri.parse('http://localhost:3000/fetchleetcode'),
+          Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
           body: jsonEncode({'username': username}),
           headers: {"Content-Type": "application/json"});
     } else {
@@ -153,7 +154,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       final dynamic response;
       if (kIsWeb) {
         response = await http.post(
-          Uri.parse('http://localhost:3000/fetchgfg'),
+          Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'username': username}),
         );
@@ -303,6 +304,22 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
     updatePlatformData(platformData);
 
+    int easy = leetcodeEasy + gfgEasy;
+    int medium = leetcodeMedium + gfgMedium;
+    int hard = leetcodeHard + gfgHard;
+
+    int totalQuestions = leetcodeTotalEasy +
+        leetcodeTotalMedium +
+        leetcodeTotalHard +
+        gfgTotalEasy +
+        gfgTotalMedium +
+        gfgTotalHard;
+
+    double easyProgress = easy / totalQuestions;
+    double mediumProgress = easyProgress + (medium / totalQuestions);
+    double hardProgress =
+        easyProgress + mediumProgress + (hard / totalQuestions);
+
     return Scaffold(
       appBar: AppBar(
         title: const Row(
@@ -427,25 +444,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 5,
                                   backgroundColor: Colors.grey,
-                                  value: (leetcodeTotalHard + gfgTotalHard) == 0
-                                      ? 0
-                                      : (leetcodeHard + gfgHard) /
-                                                      (leetcodeTotalHard +
-                                                          gfgTotalHard) +
-                                                  (leetcodeTotalMedium +
-                                                      gfgTotalMedium) ==
-                                              0
-                                          ? 0
-                                          : (leetcodeMedium + gfgMedium) /
-                                                          (leetcodeTotalMedium +
-                                                              gfgTotalMedium) +
-                                                      (gfgTotalEasy +
-                                                          leetcodeTotalEasy) ==
-                                                  0
-                                              ? 0
-                                              : (leetcodeEasy + gfgEasy) /
-                                                  (gfgTotalEasy +
-                                                      leetcodeTotalEasy),
+                                  value: hardProgress,
                                   strokeCap: StrokeCap.round,
                                   valueColor:
                                       const AlwaysStoppedAnimation<Color>(
@@ -457,18 +456,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                                 width: 85,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 5,
-                                  value: (gfgTotalEasy + leetcodeTotalEasy) == 0
-                                      ? 0
-                                      : (leetcodeMedium + gfgMedium) /
-                                                      (leetcodeTotalMedium +
-                                                          gfgTotalMedium) +
-                                                  (gfgTotalEasy +
-                                                      leetcodeTotalEasy) ==
-                                              0
-                                          ? 0
-                                          : (leetcodeEasy + gfgEasy) /
-                                              (gfgTotalEasy +
-                                                  leetcodeTotalEasy),
+                                  value: mediumProgress,
                                   strokeCap: StrokeCap.round,
                                   valueColor:
                                       const AlwaysStoppedAnimation<Color>(
@@ -480,10 +468,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                                 width: 85,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 5,
-                                  value: (gfgTotalEasy + leetcodeTotalEasy) == 0
-                                      ? 0
-                                      : (leetcodeEasy + gfgEasy) /
-                                          (gfgTotalEasy + leetcodeTotalEasy),
+                                  value: easyProgress,
                                   strokeCap: StrokeCap.round,
                                   valueColor:
                                       const AlwaysStoppedAnimation<Color>(

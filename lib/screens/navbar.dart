@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 List<String> pages = [
   '/home',
-  '/profile',
   '/leaderboard',
   '/setting',
 ];
@@ -21,12 +20,9 @@ void _onItemTapped(BuildContext context, int index) {
       context.go('/home');
       break;
     case 1:
-      context.go('/profile');
-      break;
-    case 2:
       context.go('/leaderboard');
       break;
-    case 3:
+    case 2:
       context.go('/setting');
       break;
   }
@@ -37,14 +33,11 @@ int _calculateSelectedIndex(BuildContext context) {
   if (location.startsWith('/home')) {
     return 0;
   }
-  if (location.startsWith('/profile')) {
+  if (location.startsWith('/leaderboard')) {
     return 1;
   }
-  if (location.startsWith('/leaderboard')) {
-    return 2;
-  }
   if (location.startsWith('/setting')) {
-    return 3;
+    return 2;
   }
   return 0;
 }
@@ -82,13 +75,6 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
             context.go('/home');
           },
           child: Text('Home'),
-        ),
-        CupertinoButton(
-          onPressed: () {
-            // onchanged(1);
-            context.go('/profile');
-          },
-          child: Text('Profile'),
         ),
         CupertinoButton(
           onPressed: () {
@@ -137,7 +123,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
       backgroundColor: Colors.grey.shade800,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         BottomNavigationBarItem(
             icon: Icon(Icons.leaderboard), label: 'Leaderboard'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
