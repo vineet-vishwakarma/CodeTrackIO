@@ -2,6 +2,7 @@ import 'package:codetrackio/controllers/auth_controller.dart';
 import 'package:codetrackio/screens/navbar.dart';
 import 'package:codetrackio/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -32,6 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: 'Logout',
               onPressed: () {
                 AuthController().logut();
+                context.go('/');
               },
             ),
           ),
