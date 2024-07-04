@@ -8,8 +8,7 @@ class LanguageChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Chip(
       label: Text(text),
-      color:
-          MaterialStatePropertyAll(Theme.of(context).colorScheme.onSecondary),
+      color: WidgetStatePropertyAll(Theme.of(context).colorScheme.onSecondary),
       side: BorderSide.none,
     );
   }

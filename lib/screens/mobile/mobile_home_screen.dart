@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codetrackio/controllers/auth_controller.dart';
+import 'package:codetrackio/screens/all_badges.dart';
 import 'package:codetrackio/screens/navbar.dart';
 import 'package:codetrackio/utils/utils.dart';
 import 'package:codetrackio/widgets/custom_button.dart';
@@ -100,7 +101,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           headers: {"Content-Type": "application/json"});
     } else {
       response = await http.get(Uri.parse(
-          'https://leetcode.com/graphql?query=query%20{%20userContestRanking(username:%20%20%22$username%22)%20{%20attendedContestsCount%20rating%20topPercentage%20}%20recentAcSubmissionList(username:%20%22$username%22,%20limit:%2025)%20{%20id%20title%20titleSlug%20timestamp%20}%20matchedUser(username:%20%22$username%22)%20{%20username%20userCalendar(year:%202024)%20{%20activeYears%20streak%20totalActiveDays%20dccBadges%20{%20timestamp%20badge%20{%20name%20icon%20}%20}%20submissionCalendar%20}%20activeBadge%20{%20displayName%20icon%20}%20submitStats:%20submitStatsGlobal%20{%20acSubmissionNum%20{%20difficulty%20count%20submissions%20}%20}%20languageProblemCount%20{%20languageName%20problemsSolved%20}%20problemsSolvedBeatsStats%20{%20difficulty%20percentage%20}%20}%20}'));
+          'https://leetcode.com/graphql?query=query%20{%20userContestRanking(username:%20%20%22$username%22)%20{%20attendedContestsCount%20rating%20topPercentage%20}%20recentAcSubmissionList(username:%20%22$username%22,%20limit:%2025)%20{%20id%20title%20titleSlug%20timestamp%20}%20matchedUser(username:%20%22$username%22)%20{%20username%20badges%20{%20id%20name%20shortName%20displayName%20icon%20hoverText%20medal%20{%20slug%20config%20{%20iconGif%20iconGifBackground%20}%20}%20creationDate%20category%20}userCalendar(year:%202024)%20{%20activeYears%20streak%20totalActiveDays%20dccBadges%20{%20timestamp%20badge%20{%20name%20icon%20}%20}%20submissionCalendar%20}%20activeBadge%20{%20displayName%20icon%20}%20submitStats:%20submitStatsGlobal%20{%20acSubmissionNum%20{%20difficulty%20count%20submissions%20}%20}%20languageProblemCount%20{%20languageName%20problemsSolved%20}%20problemsSolvedBeatsStats%20{%20difficulty%20percentage%20}%20}%20}'));
     }
 
     if (response.statusCode == 200) {
@@ -113,6 +114,8 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       final submission = jsonDecode(response.body)['data']['matchedUser']
           ['userCalendar']['submissionCalendar'];
       final submissionData = jsonDecode(submission);
+
+      final badges = jsonDecode(response.body)['data']['matchedUser']['badges'];
 
       List<String> languages = [];
 
@@ -131,6 +134,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         'leetcodeData': data,
         'submissionData': submissionData,
         'languages': totalLanguages,
+        'badges': badges,
       });
     } else {
       throw Exception('Error');
@@ -227,10 +231,20 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         .update({'platform': data});
   }
 
+  updateBadges() async {
+    final List<dynamic> badges = [];
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(AuthController().getCurrentUser()!.uid)
+        .update({'badges': badges});
+  }
+
   @override
   void initState() {
     if (widget.snapshot['leetcodeUsername'] != '') {
       fetchLeetcode();
+    } else {
+      updateBadges();
     }
     if (widget.snapshot['gfgUsername'] != '') {
       fetchGFG();
@@ -331,6 +345,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         : easyProgress + mediumProgress + (hard / totalQuestions);
 
     final List<dynamic> languages = widget.snapshot['languages'];
+    final List<dynamic> badges = widget.snapshot['badges'];
 
     return Scaffold(
       appBar: AppBar(
@@ -570,6 +585,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                 ],
               ),
               const SizedBox(height: 20),
+// =================== Heatmap ===================================
               Row(
                 children: [
                   Expanded(
@@ -584,6 +600,66 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                 ],
               ),
               const SizedBox(height: 20),
+// ==================== Badges ============================
+              Row(
+                children: [
+                  Expanded(
+                    child: Card(
+                      elevation: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 20, horizontal: 10),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Badges',
+                              style: h2Style(),
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              alignment: WrapAlignment.spaceEvenly,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              direction: Axis.horizontal,
+                              spacing: 5,
+                              runSpacing: 5,
+                              children: badges.isEmpty
+                                  ? [const LanguageChip(text: 'Not Available')]
+                                  : badges.map((badge) {
+                                      return Image.network(
+                                        badge['medal']['config']['iconGif'],
+                                        width: 70,
+                                      );
+                                    }).toList(),
+                            ),
+                            const SizedBox(height: 15),
+                            badges.isNotEmpty
+                                ? ElevatedButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) => Dialog(
+                                          elevation: 1,
+                                          child: AllBadges(badges: badges),
+                                        ),
+                                      );
+                                    },
+                                    style: const ButtonStyle(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        Color.fromARGB(255, 46, 44, 54),
+                                      ),
+                                    ),
+                                    child: const Text('View All'),
+                                  )
+                                : const SizedBox(height: 0, width: 0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+// ======================= DSA ==========================
               Column(
                 children: [
                   Card(
