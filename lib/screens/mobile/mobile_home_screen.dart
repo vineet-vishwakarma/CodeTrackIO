@@ -29,7 +29,6 @@ class MobileHomeScreen extends StatefulWidget {
 class _MobileHomeScreenState extends State<MobileHomeScreen> {
   List<dynamic> leetcodeData = [];
   List<dynamic> gfgData = [];
-  List<dynamic> platformData = [];
   final leetcodeUsernameController = TextEditingController();
   final gfgUsernameController = TextEditingController();
   Set<String> totalLanguages = {};
@@ -68,7 +67,8 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
     try {
       final dynamic response;
       if (kIsWeb) {
-        response = await http.post(Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
+        response = await http.post(
+            Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
             body: jsonEncode({'username': username}),
             headers: {"Content-Type": "application/json"});
       } else {
@@ -114,14 +114,6 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           ['userCalendar']['submissionCalendar'];
       final submissionData = jsonDecode(submission);
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(AuthController().getCurrentUser()!.uid)
-          .update({
-        'leetcodeData': data,
-        'submissionData': submissionData,
-      });
-
       List<String> languages = [];
 
       languagesJson.forEach((map) {
@@ -129,8 +121,16 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       });
 
       setState(() {
-        platformData.add(data);
         totalLanguages.addAll(languages);
+      });
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(AuthController().getCurrentUser()!.uid)
+          .update({
+        'leetcodeData': data,
+        'submissionData': submissionData,
+        'languages': totalLanguages,
       });
     } else {
       throw Exception('Error');
@@ -165,7 +165,12 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       }
 
       if (response.statusCode == 200) {
-        final res = jsonDecode(response.body);
+        final dynamic res;
+        if (kIsWeb) {
+          res = jsonDecode(response.body);
+        } else {
+          res = response.body;
+        }
         final document = parser.parse(res);
 
         final question = document.querySelector(
@@ -193,14 +198,17 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           questionsNumbers[8],
         ];
 
+        setState(() {
+          // platformData.add(data);
+          totalLanguages.addAll(languages);
+        });
+
         await FirebaseFirestore.instance
             .collection('users')
             .doc(AuthController().getCurrentUser()!.uid)
-            .update({'gfgData': data});
-
-        setState(() {
-          platformData.add(data);
-          totalLanguages.addAll(languages);
+            .update({
+          'gfgData': data,
+          'languages': totalLanguages,
         });
       } else {
         throw Exception('Failed to load data');
@@ -315,10 +323,14 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         gfgTotalMedium +
         gfgTotalHard;
 
-    double easyProgress = easy / totalQuestions;
-    double mediumProgress = easyProgress + (medium / totalQuestions);
-    double hardProgress =
-        easyProgress + mediumProgress + (hard / totalQuestions);
+    double easyProgress = (totalQuestions == 0) ? 0 : easy / totalQuestions;
+    double mediumProgress =
+        (totalQuestions == 0) ? 0 : easyProgress + (medium / totalQuestions);
+    double hardProgress = (totalQuestions == 0)
+        ? 0
+        : easyProgress + mediumProgress + (hard / totalQuestions);
+
+    final List<dynamic> languages = widget.snapshot['languages'];
 
     return Scaffold(
       appBar: AppBar(
@@ -544,9 +556,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                               direction: Axis.horizontal,
                               spacing: 5,
                               runSpacing: 5,
-                              children: totalLanguages.isEmpty
+                              children: languages.isEmpty
                                   ? [const LanguageChip(text: 'Not Available')]
-                                  : totalLanguages.map((e) {
+                                  : languages.map((e) {
                                       return LanguageChip(text: e);
                                     }).toList(),
                             ),
@@ -614,17 +626,29 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                                 )
                               : leetcodeData.isEmpty
                                   ? const PlatformLoader()
-                                  : PlatformCard(
-                                      size: size,
-                                      totalQuestions: leetcodeTotalHard +
-                                          leetcodeTotalMedium +
-                                          leetcodeTotalEasy,
-                                      easyQuestionSolved: leetcodeEasy,
-                                      mediumQuestionSolved: leetcodeMedium,
-                                      hardQuestionSolved: leetcodeHard,
-                                      easyQuestions: leetcodeTotalEasy,
-                                      mediumQuestions: leetcodeTotalMedium,
-                                      hardQuestions: leetcodeTotalHard,
+                                  : Column(
+                                      children: [
+                                        Center(
+                                          child: Text(
+                                            'Username: $leetcodeUsername',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 25),
+                                        PlatformCard(
+                                          size: size,
+                                          totalQuestions: leetcodeTotalHard +
+                                              leetcodeTotalMedium +
+                                              leetcodeTotalEasy,
+                                          easyQuestionSolved: leetcodeEasy,
+                                          mediumQuestionSolved: leetcodeMedium,
+                                          hardQuestionSolved: leetcodeHard,
+                                          easyQuestions: leetcodeTotalEasy,
+                                          mediumQuestions: leetcodeTotalMedium,
+                                          hardQuestions: leetcodeTotalHard,
+                                        ),
+                                      ],
                                     ),
                         ],
                       ),
@@ -669,17 +693,29 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                                 )
                               : gfgData.isEmpty
                                   ? const PlatformLoader()
-                                  : PlatformCard(
-                                      size: size,
-                                      totalQuestions: gfgTotalHard +
-                                          gfgTotalMedium +
-                                          gfgTotalEasy,
-                                      easyQuestionSolved: gfgEasy,
-                                      mediumQuestionSolved: gfgMedium,
-                                      hardQuestionSolved: gfgHard,
-                                      easyQuestions: gfgTotalEasy,
-                                      mediumQuestions: gfgTotalMedium,
-                                      hardQuestions: gfgTotalHard,
+                                  : Column(
+                                      children: [
+                                        Center(
+                                          child: Text(
+                                            'Username: $gfgUsername',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 25),
+                                        PlatformCard(
+                                          size: size,
+                                          totalQuestions: gfgTotalHard +
+                                              gfgTotalMedium +
+                                              gfgTotalEasy,
+                                          easyQuestionSolved: gfgEasy,
+                                          mediumQuestionSolved: gfgMedium,
+                                          hardQuestionSolved: gfgHard,
+                                          easyQuestions: gfgTotalEasy,
+                                          mediumQuestions: gfgTotalMedium,
+                                          hardQuestions: gfgTotalHard,
+                                        ),
+                                      ],
                                     ),
                         ],
                       ),
@@ -692,6 +728,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         ),
       ),
       bottomNavigationBar: const CustomBottomNavigationBar(),
+      // resizeToAvoidBottomInset: true,
     );
   }
 }

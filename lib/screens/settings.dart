@@ -1,4 +1,6 @@
+import 'package:codetrackio/controllers/auth_controller.dart';
 import 'package:codetrackio/screens/navbar.dart';
+import 'package:codetrackio/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -21,7 +23,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               toolbarHeight: 60,
               scrolledUnderElevation: 0,
             ),
-      body: Center(child: Text('Settings')),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: CustomButton(
+              title: 'Logout',
+              onPressed: () {
+                AuthController().logut();
+              },
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar:
           width < 768 ? const CustomBottomNavigationBar() : null,
     );

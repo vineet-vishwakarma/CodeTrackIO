@@ -84,13 +84,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
   Future<void> fetchLeetcode() async {
     String username = widget.snapshot['leetcodeUsername'];
-    // final response = await http.get(
-    //   Uri.parse(
-    //       'https://leetcode.com/graphql?query=query%20{%20userContestRanking(username:%20%20%22$username%22)%20{%20attendedContestsCount%20rating%20topPercentage%20}%20recentAcSubmissionList(username:%20%22$username%22,%20limit:%2025)%20{%20id%20title%20titleSlug%20timestamp%20}%20matchedUser(username:%20%22$username%22)%20{%20username%20userCalendar(year:%202024)%20{%20activeYears%20streak%20totalActiveDays%20dccBadges%20{%20timestamp%20badge%20{%20name%20icon%20}%20}%20submissionCalendar%20}%20activeBadge%20{%20displayName%20icon%20}%20submitStats:%20submitStatsGlobal%20{%20acSubmissionNum%20{%20difficulty%20count%20submissions%20}%20}%20languageProblemCount%20{%20languageName%20problemsSolved%20}%20problemsSolvedBeatsStats%20{%20difficulty%20percentage%20}%20}%20}'),
-    // );
     try {
       final response = await http.post(
-          // Uri.parse('http://localhost:3000/fetchleetcode'),
           Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
           body: jsonEncode({'username': username}),
           headers: {"Content-Type": "application/json"});
@@ -105,14 +100,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             ['userCalendar']['submissionCalendar'];
         final submissionData = jsonDecode(submission);
 
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(AuthController().getCurrentUser()!.uid)
-            .update({
-          'leetcodeData': data,
-          'submissionData': submissionData,
-        });
-
         List<String> languages = [];
 
         languagesJson.forEach((map) {
@@ -122,11 +109,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         setState(() {
           totalLanguages.addAll(languages);
         });
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(AuthController().getCurrentUser()!.uid)
+            .update({
+          'leetcodeData': data,
+          'submissionData': submissionData,
+          'languages': totalLanguages,
+        });
       } else {
         throw Exception('Error');
       }
     } on Exception catch (e) {
-      // Fluttertoast.showToast(msg: e.toString(), timeInSecForIosWeb: 100);
       toast(e.toString());
     }
   }
@@ -182,14 +177,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           questionsNumbers[6],
           questionsNumbers[8],
         ];
+        setState(() {
+          totalLanguages.addAll(languages);
+        });
 
         await FirebaseFirestore.instance
             .collection('users')
             .doc(AuthController().getCurrentUser()!.uid)
-            .update({'gfgData': data});
-
-        setState(() {
-          totalLanguages.addAll(languages);
+            .update({
+          'gfgData': data,
+          'languages': totalLanguages,
         });
       } else {
         throw Exception('Failed to load data');
@@ -228,7 +225,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     gfgData = widget.snapshot['gfgData'];
     leetcodeData = widget.snapshot['leetcodeData'];
     final Map<String, dynamic> dataSets = widget.snapshot['submissionData'];
-
+    final List<dynamic> languages = widget.snapshot['languages'];
     int leetcodeEasy = 0;
     int leetcodeMedium = 0;
     int leetcodeHard = 0;
@@ -291,10 +288,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     int easy = leetcodeEasy + gfgEasy;
     int medium = leetcodeMedium + gfgMedium;
     int hard = leetcodeHard + gfgHard;
-
-    // int toatalEasy = leetcodeTotalEasy + gfgTotalEasy;
-    // int totalMedium = leetcodeTotalMedium + gfgTotalMedium;
-    // int totalHard = leetcodeTotalHard + gfgTotalHard;
 
     int totalQuestions = leetcodeTotalEasy +
         leetcodeTotalMedium +
@@ -533,12 +526,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 direction: Axis.horizontal,
                                 spacing: 5,
                                 runSpacing: 5,
-                                children: totalLanguages.isEmpty
+                                children: languages.isEmpty
                                     ? [
                                         const LanguageChip(
                                             text: 'Not Available')
                                       ]
-                                    : totalLanguages.map((e) {
+                                    : languages.map((e) {
                                         return LanguageChip(text: e);
                                       }).toList(),
                               ),

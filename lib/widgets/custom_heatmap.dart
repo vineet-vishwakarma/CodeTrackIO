@@ -44,9 +44,9 @@ class CustomHeatMap extends StatelessWidget {
               '${dataSets[value] ?? 0} submissions on ${value.day}/${value.month}/${value.year}',
           webBgColor: "linear-gradient(#24222a,#24222a)",
           timeInSecForIosWeb: 3,
-          backgroundColor: const Color.fromRGBO(36, 34, 42, 255),
+          backgroundColor: const Color.fromARGB(255, 46, 44, 54),
           webPosition: size > 768 ? "right" : "center",
-          gravity: size > 768 ? ToastGravity.BOTTOM_RIGHT : ToastGravity.TOP,
+          gravity: size > 768 ? ToastGravity.BOTTOM_RIGHT : ToastGravity.CENTER,
         );
       },
     );
