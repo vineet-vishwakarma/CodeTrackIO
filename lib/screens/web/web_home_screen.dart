@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:codetrackio/controllers/auth_controller.dart';
+import 'package:codetrackio/screens/all_badges.dart';
 import 'package:codetrackio/screens/navbar.dart';
 import 'package:codetrackio/widgets/custom_button.dart';
 import 'package:codetrackio/widgets/text_input_field.dart';
@@ -31,6 +32,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   final leetcodeUsernameController = TextEditingController();
   final gfgUsernameController = TextEditingController();
   Set<String> totalLanguages = {};
+  // List<dynamic> badges = [];
 
   saveLeetcodeUsername(String username) async {
     try {
@@ -99,6 +101,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         final submission = jsonDecode(response.body)['data']['matchedUser']
             ['userCalendar']['submissionCalendar'];
         final submissionData = jsonDecode(submission);
+
+        // setState(() {
+        //   badges = jsonDecode(response.body)['data']['matchedUser']['badges'];
+        // });
 
         List<String> languages = [];
 
@@ -226,6 +232,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     leetcodeData = widget.snapshot['leetcodeData'];
     final Map<String, dynamic> dataSets = widget.snapshot['submissionData'];
     final List<dynamic> languages = widget.snapshot['languages'];
+    final List<dynamic> badges = widget.snapshot['badges'];
+
     int leetcodeEasy = 0;
     int leetcodeMedium = 0;
     int leetcodeHard = 0;
@@ -553,6 +561,74 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 20.0, horizontal: 10),
                         child: CustomHeatMap(dataSet: dataSets),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: Card(
+                      elevation: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 20, horizontal: 10),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Badges',
+                              style: h2Style(),
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              alignment: WrapAlignment.spaceEvenly,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              direction: Axis.horizontal,
+                              spacing: 5,
+                              runSpacing: 5,
+                              children: badges.isEmpty
+                                  ? [const LanguageChip(text: 'Not Available')]
+                                  : badges.map((badge) {
+                                      final String iconUrl =
+                                          badge['medal']['config']['iconGif'];
+                                      List<String> parts = iconUrl.split('/');
+                                      String extracted = parts.last;
+                                      return Tooltip(
+                                        message: badge['hoverText'],
+                                        child: Image.network(
+                                          iconUrl.contains(
+                                                  'https://leetcode.com/static/images/badges/2024/gif/')
+                                              ? 'https://assets.leetcode.com/static_assets/public/images/badges/2024/gif/$extracted'
+                                              : iconUrl,
+                                          width: 70,
+                                        ),
+                                      );
+                                    }).toList(),
+                            ),
+                            const SizedBox(height: 15),
+                            badges.isNotEmpty
+                                ? ElevatedButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) => Dialog(
+                                          elevation: 1,
+                                          child: AllBadges(badges: badges),
+                                        ),
+                                      );
+                                    },
+                                    style: const ButtonStyle(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        Color.fromARGB(255, 46, 44, 54),
+                                      ),
+                                    ),
+                                    child: const Text('View All'),
+                                  )
+                                : const SizedBox(height: 0, width: 0),
+                          ],
+                        ),
                       ),
                     ),
                   ),

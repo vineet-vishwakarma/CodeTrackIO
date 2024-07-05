@@ -625,9 +625,19 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                               children: badges.isEmpty
                                   ? [const LanguageChip(text: 'Not Available')]
                                   : badges.map((badge) {
-                                      return Image.network(
-                                        badge['medal']['config']['iconGif'],
-                                        width: 70,
+                                      final String iconUrl =
+                                          badge['medal']['config']['iconGif'];
+                                      List<String> parts = iconUrl.split('/');
+                                      String extracted = parts.last;
+                                      return Tooltip(
+                                        message: badge['hoverText'],
+                                        child: Image.network(
+                                          iconUrl.contains(
+                                                  'https://leetcode.com/static/images/badges/2024/gif/')
+                                              ? 'https://assets.leetcode.com/static_assets/public/images/badges/2024/gif/$extracted'
+                                              : iconUrl,
+                                          width: 70,
+                                        ),
                                       );
                                     }).toList(),
                             ),
