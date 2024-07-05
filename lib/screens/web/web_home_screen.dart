@@ -223,7 +223,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size.width;
-
+    final width = MediaQuery.of(context).size.width;
     final String username = widget.snapshot['username'];
     final String leetcodeUsername = widget.snapshot['leetcodeUsername'];
     final String gfgUsername = widget.snapshot['gfgUsername'];
@@ -590,7 +590,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               runSpacing: 5,
                               children: badges.isEmpty
                                   ? [const LanguageChip(text: 'Not Available')]
-                                  : badges.map((badge) {
+                                  : badges
+                                      .take(width > 768 ? 8 : 4)
+                                      .map((badge) {
                                       final String iconUrl =
                                           badge['medal']['config']['iconGif'];
                                       List<String> parts = iconUrl.split('/');

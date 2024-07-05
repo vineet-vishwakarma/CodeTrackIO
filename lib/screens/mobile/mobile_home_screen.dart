@@ -624,7 +624,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                               runSpacing: 5,
                               children: badges.isEmpty
                                   ? [const LanguageChip(text: 'Not Available')]
-                                  : badges.map((badge) {
+                                  : badges.take(4).map((badge) {
                                       final String iconUrl =
                                           badge['medal']['config']['iconGif'];
                                       List<String> parts = iconUrl.split('/');
