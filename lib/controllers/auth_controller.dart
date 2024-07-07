@@ -38,27 +38,42 @@ class AuthController {
         email: email,
         password: password,
       );
-
       // save user to database
-      _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'uid': userCredential.user!.uid,
-        'email': userCredential.user!.email,
-        'username': username,
-        'leetcodeUsername': '',
-        'gfgUsername': '',
-        'gfgData': [],
-        'leetcodeData': [],
-        'submissionData': {},
-        'fullname': fullname,
-        'city': '',
-        'college': '',
-        'rank': -1,
-        'platform': {
-          'All': {'All': 0, 'Easy': 0, 'Medium': 0, 'Hard': 0},
-          'Leetcode': {'All': 0, 'Easy': 0, 'Medium': 0, 'Hard': 0},
-          'Gfg': {'All': 0, 'Easy': 0, 'Medium': 0, 'Hard': 0}
-        },
-      });
+      if (userCredential.user != null) {
+        try {
+          // save user to database
+          await _firestore
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .set({
+            'uid': userCredential.user!.uid,
+            'email': userCredential.user!.email,
+            'username': username,
+            'leetcodeUsername': '',
+            'gfgUsername': '',
+            'languages': [],
+            'gfgData': [],
+            'leetcodeData': [],
+            'submissionData': {},
+            'fullname': fullname,
+            'badges': [],
+            'city': '',
+            'college': '',
+            'rank': -1,
+            'platform': {
+              'All': {'All': 0, 'Easy': 0, 'Medium': 0, 'Hard': 0},
+              'Leetcode': {'All': 0, 'Easy': 0, 'Medium': 0, 'Hard': 0},
+              'Gfg': {'All': 0, 'Easy': 0, 'Medium': 0, 'Hard': 0}
+            },
+          });
+        } catch (e) {
+          // handle the error
+          print('Error saving user to database: $e');
+        }
+      } else {
+        // handle the case where userCredential.user is null
+        throw 'Failed to create user';
+      }
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
@@ -86,13 +101,6 @@ class AuthGate extends StatelessWidget {
           }
           if (snapshot.hasData) {
             return const HomeScreen();
-            // LayoutBuilder(builder: (context, constraints) {
-            //   if (constraints.maxWidth > 768) {
-            //     return const WebScreen();
-            //   } else {
-            //     return const MobileScreen();
-            //   }
-            // });
           }
           return const LoginOrSignup();
         },

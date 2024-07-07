@@ -15,21 +15,25 @@ class AppRouter {
       ),
       GoRoute(
         path: '/home',
+        redirect: (context, state) => _redirect(context),
         pageBuilder: (context, state) =>
             const MaterialPage(child: HomeScreen()),
       ),
       GoRoute(
         path: '/leaderboard',
+        redirect: (context, state) => _redirect(context),
         pageBuilder: (context, state) =>
             const MaterialPage(child: LeaderboardScreen()),
       ),
       GoRoute(
         path: '/profile',
+        redirect: (context, state) => _redirect(context),
         pageBuilder: (context, state) =>
             const MaterialPage(child: Text('Profile')),
       ),
       GoRoute(
         path: '/setting',
+        redirect: (context, state) => _redirect(context),
         pageBuilder: (context, state) =>
             const MaterialPage(child: SettingsScreen()),
       ),
@@ -44,4 +48,10 @@ class AppRouter {
       ),
     ),
   );
+  static String? _redirect(BuildContext context) {
+    if (AuthController().getCurrentUser() != null) {
+      return null;
+    }
+    return '/';
+  }
 }

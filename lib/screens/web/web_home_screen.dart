@@ -32,7 +32,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   final leetcodeUsernameController = TextEditingController();
   final gfgUsernameController = TextEditingController();
   Set<String> totalLanguages = {};
-  // List<dynamic> badges = [];
 
   saveLeetcodeUsername(String username) async {
     try {
@@ -102,10 +101,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             ['userCalendar']['submissionCalendar'];
         final submissionData = jsonDecode(submission);
 
-        // setState(() {
-        //   badges = jsonDecode(response.body)['data']['matchedUser']['badges'];
-        // });
-
+        final badges =
+            jsonDecode(response.body)['data']['matchedUser']['badges'];
         List<String> languages = [];
 
         languagesJson.forEach((map) {
@@ -123,6 +120,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           'leetcodeData': data,
           'submissionData': submissionData,
           'languages': totalLanguages,
+          'badges': badges,
         });
       } else {
         throw Exception('Error');
@@ -209,10 +207,20 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         .update({'platform': data});
   }
 
+  updateBadges() async {
+    final List<dynamic> badges = [];
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(AuthController().getCurrentUser()!.uid)
+        .update({'badges': badges});
+  }
+
   @override
   void initState() {
     if (widget.snapshot['leetcodeUsername'] != '') {
       fetchLeetcode();
+    } else {
+      updateBadges();
     }
     if (widget.snapshot['gfgUsername'] != '') {
       fetchGFG();
