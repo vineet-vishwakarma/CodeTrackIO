@@ -1,7 +1,9 @@
 import 'package:codetrackio/controllers/auth_controller.dart';
 import 'package:codetrackio/screens/home_screen.dart';
 import 'package:codetrackio/screens/leaderboard_screen.dart';
+import 'package:codetrackio/screens/platform_url_screen.dart';
 import 'package:codetrackio/screens/settings.dart';
+import 'package:codetrackio/screens/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
@@ -26,16 +28,23 @@ class AppRouter {
             const MaterialPage(child: LeaderboardScreen()),
       ),
       GoRoute(
-        path: '/profile',
-        redirect: (context, state) => _redirect(context),
-        pageBuilder: (context, state) =>
-            const MaterialPage(child: Text('Profile')),
+        path: '/profile/:username',
+        builder: (context, state) {
+          final username = state.pathParameters['username']!;
+          return UserProfile(username: username);
+        },
       ),
       GoRoute(
         path: '/setting',
         redirect: (context, state) => _redirect(context),
         pageBuilder: (context, state) =>
             const MaterialPage(child: SettingsScreen()),
+      ),
+      GoRoute(
+        path: '/platforms',
+        redirect: (context, state) => _redirect(context),
+        pageBuilder: (context, state) =>
+            const MaterialPage(child: PlatformUrlScreen()),
       ),
     ],
     errorPageBuilder: (context, state) => MaterialPage(
