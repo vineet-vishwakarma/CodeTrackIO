@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codetrackio/controllers/auth_controller.dart';
+import 'package:codetrackio/utils/utils.dart';
 import 'package:codetrackio/widgets/custom_button.dart';
 import 'package:codetrackio/widgets/text_input_field.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 
 final TextEditingController _emailController = TextEditingController();
@@ -42,16 +42,16 @@ void _signup() async {
           _cPasswordController.clear();
           _fullnameController.clear();
         } catch (e) {
-          Fluttertoast.showToast(msg: e.toString());
+          toast(e.toString());
         }
       } else {
-        Fluttertoast.showToast(msg: 'Fill All Fields!!');
+        toast('Fill All Fields!!');
       }
     } else {
-      Fluttertoast.showToast(msg: 'Password Not Matched!');
+      toast('Password Not Matched!');
     }
   } else {
-    Fluttertoast.showToast(msg: 'Username Not Available');
+    toast('Username Not Available');
   }
 }
 

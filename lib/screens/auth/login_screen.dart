@@ -1,8 +1,8 @@
 import 'package:codetrackio/controllers/auth_controller.dart';
+import 'package:codetrackio/utils/utils.dart';
 import 'package:codetrackio/widgets/custom_button.dart';
 import 'package:codetrackio/widgets/text_input_field.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
 
@@ -23,7 +23,7 @@ class LoginScreen extends StatelessWidget {
         await authController.signInWithEmailPassword(
             emailController.text, passwordController.text);
       } catch (e) {
-        Fluttertoast.showToast(msg: e.toString());
+        toast(e.toString());
       }
     }
 
