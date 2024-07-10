@@ -36,28 +36,29 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
   saveLeetcodeUsername(String username) async {
     try {
-      final dynamic response;
-      // final
-      if (kIsWeb) {
-        response = await http.post(
-            // Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
-            Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
-            body: jsonEncode({'username': username}),
-            headers: {"Content-Type": "application/json"});
-      } else {
-        response = await http.get(Uri.parse(
-            'https://leetcode.com/graphql?query=query%20{%20userContestRanking(username:%20%20%22$username%22)%20{%20attendedContestsCount%20rating%20globalRanking%20totalParticipants%20topPercentage%20}}'));
-      }
+      // final response = await http.get(Uri.parse(
+      //     'https://leetcode.com/graphql?query=query%20{%20userContestRanking(username:%20%20%22$username%22)%20{%20attendedContestsCount%20rating%20globalRanking%20totalParticipants%20topPercentage%20}}'));
+
+      final response = await http.post(
+          // Uri.parse('http://localhost:3000/fetchleetcode'),
+          Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
+          body: jsonEncode({'username': username}),
+          headers: {"Content-Type": "application/json"});
 
       if (response.statusCode == 200) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(AuthController().getCurrentUser()!.uid)
-            .update({'leetcodeUsername': username});
-
-        fetchLeetcode();
+        final data = jsonDecode(response.body)['errors'];
+        if (data == null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(AuthController().getCurrentUser()!.uid)
+              .update({'leetcodeUsername': username});
+          toast('Username Saved ✅');
+          fetchLeetcode();
+        } else {
+          toast('Username not found ⚠️');
+        }
       } else {
-        toast('Username not found');
+        toast('Username not found ⚠️');
       }
     } on Exception catch (e) {
       toast(e.toString());
@@ -66,25 +67,25 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
   saveGfgUsername(String username) async {
     try {
-      final dynamic response;
-      if (kIsWeb) {
-        response = await http.post(
-            Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
-            body: jsonEncode({'username': username}),
-            headers: {"Content-Type": "application/json"});
-      } else {
-        response = await http
-            .get(Uri.parse('https://www.geeksforgeeks.org/user/$username/'));
-      }
+      final response = await http.post(
+          // Uri.parse('http://localhost:3000/fetchgfg'),
+          Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
+          body: jsonEncode({'username': username}),
+          headers: {"Content-Type": "application/json"});
       if (response.statusCode == 200) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(AuthController().getCurrentUser()!.uid)
-            .update({'gfgUsername': username});
-
-        fetchGFG();
+        final data = jsonDecode(response.body)['message'];
+        if (data == "null") {
+          toast('Username not found ⚠️');
+        } else {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(AuthController().getCurrentUser()!.uid)
+              .update({'gfgUsername': username});
+          toast('Username Saved ✅');
+          fetchGFG();
+        }
       } else {
-        toast('Username not found');
+        toast('Username not found ⚠️');
       }
     } on Exception catch (e) {
       toast(e.toString());

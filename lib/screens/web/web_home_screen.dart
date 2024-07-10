@@ -47,14 +47,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           headers: {"Content-Type": "application/json"});
 
       if (response.statusCode == 200) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(AuthController().getCurrentUser()!.uid)
-            .update({'leetcodeUsername': username});
-
-        fetchLeetcode();
+        final data = jsonDecode(response.body)['errors'];
+        if (data == null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(AuthController().getCurrentUser()!.uid)
+              .update({'leetcodeUsername': username});
+          toast('Username Saved ✅');
+          fetchLeetcode();
+        } else {
+          toast('Username not found ⚠️');
+        }
       } else {
-        toast('Username not found');
+        toast('Username not found ⚠️');
       }
     } on Exception catch (e) {
       toast(e.toString());
@@ -63,22 +68,25 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
   saveGfgUsername(String username) async {
     try {
-      // final response = await http
-      //     .get(Uri.parse('https://www.geeksforgeeks.org/user/$username/'));
       final response = await http.post(
           // Uri.parse('http://localhost:3000/fetchgfg'),
           Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
           body: jsonEncode({'username': username}),
           headers: {"Content-Type": "application/json"});
       if (response.statusCode == 200) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(AuthController().getCurrentUser()!.uid)
-            .update({'gfgUsername': username});
-
-        fetchGFG();
+        final data = jsonDecode(response.body)['message'];
+        if (data == "null") {
+          toast('Username not found ⚠️');
+        } else {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(AuthController().getCurrentUser()!.uid)
+              .update({'gfgUsername': username});
+          toast('Username Saved ✅');
+          fetchGFG();
+        }
       } else {
-        toast('Username not found');
+        toast('Username not found ⚠️');
       }
     } on Exception catch (e) {
       toast(e.toString());
@@ -666,7 +674,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             const SizedBox(height: 20),
                             leetcodeUsername.isEmpty
                                 ? SizedBox(
-                                    height: 315,
+                                    height: 355,
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -749,7 +757,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             const SizedBox(height: 20),
                             gfgUsername.isEmpty
                                 ? SizedBox(
-                                    height: 315,
+                                    height: 355,
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,

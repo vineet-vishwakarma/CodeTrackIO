@@ -71,15 +71,14 @@ class PlatformUrlScreenState extends State<PlatformUrlScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body)['errors'];
-        print(data);
         if (data == null) {
           return true;
         } else {
-          toast('Username not found');
+          toast('Username not found ⚠️');
           return false;
         }
       } else {
-        toast('Username not found');
+        toast('Username not found ⚠️');
         return false;
       }
     } on Exception catch (e) {
@@ -96,15 +95,14 @@ class PlatformUrlScreenState extends State<PlatformUrlScreen> {
           headers: {"Content-Type": "application/json"});
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body)['message'];
-        print(data);
         if (data == "null") {
-          toast('Username not found');
+          toast('Username not found ⚠️');
           return false;
         } else {
           return true;
         }
       } else {
-        toast('Username not found');
+        toast('Username not found ⚠️');
         return false;
       }
     } on Exception catch (e) {
