@@ -156,7 +156,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       );
 
       if (response.statusCode == 200) {
-        final res = jsonDecode(response.body);
+        final res = jsonDecode(response.body)['data'];
         final document = parser.parse(res);
 
         final question = document.querySelector(
@@ -817,7 +817,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               RatingGraph(),
               ElevatedButton(
                 onPressed: () {
-                  context.go('/platform');
+                  context.go('/platforms');
                 },
                 child: Text('PlatformUrl'),
               ),

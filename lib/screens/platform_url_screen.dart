@@ -1,9 +1,16 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:codetrackio/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Platform {
   final String name;
   final String imgUrl;
   final String url;
+  bool isValid = false;
+  Timer? debounce;
 
   TextEditingController controller;
 
@@ -11,7 +18,6 @@ class Platform {
     this.name,
     this.imgUrl,
     this.url,
-    // String controllerUrl,
   ) : controller = TextEditingController(text: url);
 }
 
@@ -27,17 +33,85 @@ class PlatformUrlScreenState extends State<PlatformUrlScreen> {
     Platform(
         'Leetcode',
         'https://upload.wikimedia.org/wikipedia/commons/1/19/LeetCode_logo_black.png',
-        'https://leetcode.com/u/_viineet_'),
+        ''),
+    // Platform('CodeStudio', '', 'https://www.naukri.com/code360/profile/'),
     Platform(
-        'CodeStudio', '', 'https://www.naukri.com/code360/profile/johndoe'),
-    Platform('GeeksforGeeks', '',
-        'https://www.geeksforgeeks.org/user/vineetvishwakarma'),
-    Platform('Codechef', '', 'https://www.codechef.com/users/naam_nahi_pta'),
-    Platform(
-        'Codeforces', '', 'https://codeforces.com/profile/AyanVishwakarma'),
+        'GeeksforGeeks',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/GeeksforGeeks.svg/1280px-GeeksforGeeks.svg.png',
+        ''),
+    // Platform('Codechef', '', 'https://www.codechef.com/users/'),
+    // Platform('Codeforces', '', 'https://codeforces.com/profile/'),
   ];
 
   void _deletePlatform(int index) {}
+
+  Future<bool> _sendRequest(String url) async {
+    try {
+      final response = await http.post(
+          Uri.parse('http://localhost:3000/fetchusername'),
+          body: jsonEncode({'url': url}),
+          headers: {"Content-Type": "application/json"});
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error: $url $e');
+      return false;
+    }
+  }
+
+  Future<bool> saveLeetcodeUsername(String username) async {
+    try {
+      final response = await http.post(
+          Uri.parse('https://codetrackserver.onrender.com/fetchleetcode'),
+          body: jsonEncode({'username': username}),
+          headers: {"Content-Type": "application/json"});
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body)['errors'];
+        print(data);
+        if (data == null) {
+          return true;
+        } else {
+          toast('Username not found');
+          return false;
+        }
+      } else {
+        toast('Username not found');
+        return false;
+      }
+    } on Exception catch (e) {
+      toast(e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> saveGFGUsername(String username) async {
+    try {
+      final response = await http.post(
+          Uri.parse('https://codetrackserver.onrender.com/fetchgfg'),
+          body: jsonEncode({'username': username}),
+          headers: {"Content-Type": "application/json"});
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body)['message'];
+        print(data);
+        if (data == "null") {
+          toast('Username not found');
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        toast('Username not found');
+        return false;
+      }
+    } on Exception catch (e) {
+      toast(e.toString());
+      return false;
+    }
+  }
 
   @override
   void dispose() {
@@ -62,14 +136,44 @@ class PlatformUrlScreenState extends State<PlatformUrlScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'You can update your platform details here.',
-                  style: TextStyle(fontSize: 16),
+                SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 100.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Enter your username',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                                Colors.blueAccent.withOpacity(0.7))),
+                        onPressed: () {
+                          // Handle update logic here
+                        },
+                        child: Text('Update'),
+                      ),
+                    ],
+                  ),
                 ),
+                SizedBox(height: 30),
                 Expanded(
+                  flex: 1,
                   child: ListView.builder(
                     itemCount: platforms.length,
                     itemBuilder: (context, index) {
+                      final _controller = platforms[index].controller;
+                      final prefix = platforms[index].url;
+                      _controller.addListener(() {
+                        if (!_controller.text.startsWith(prefix)) {
+                          _controller.text = prefix;
+                          _controller.selection = TextSelection.fromPosition(
+                            TextPosition(offset: _controller.text.length),
+                          );
+                        }
+                      });
                       return Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 8, horizontal: 100),
@@ -100,19 +204,44 @@ class PlatformUrlScreenState extends State<PlatformUrlScreen> {
                                   width: width * 0.5,
                                   child: TextField(
                                     controller: platforms[index].controller,
-                                    onChanged: (value) {
-                                      print(value);
+                                    onChanged: (value) async {
+                                      if (platforms[index].debounce?.isActive ??
+                                          false) {
+                                        platforms[index].debounce!.cancel();
+                                      }
+                                      platforms[index].debounce = Timer(
+                                          const Duration(milliseconds: 500),
+                                          () async {
+                                        bool isValid = index == 0
+                                            ? await saveLeetcodeUsername(value)
+                                            : await saveGFGUsername(value);
+                                        setState(() {
+                                          platforms[index].isValid = isValid;
+                                        });
+                                      });
                                     },
                                     decoration: InputDecoration(
-                                      hintText: platforms[index].url,
+                                      border: const OutlineInputBorder(),
+                                      hintText: 'Username',
+                                      suffixIcon: Icon(
+                                        platforms[index].isValid
+                                            ? Icons.check
+                                            : Icons.warning,
+                                        color: platforms[index].isValid
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
                                     ),
                                   ),
                                 ),
                                 SizedBox(width: 10),
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () => {},
-                                ),
+                                platforms[index].controller.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () => {},
+                                      )
+                                    : SizedBox(width: 40),
                               ],
                             ),
                           ],
@@ -120,12 +249,6 @@ class PlatformUrlScreenState extends State<PlatformUrlScreen> {
                       );
                     },
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle update logic here
-                  },
-                  child: Text('Update'),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
