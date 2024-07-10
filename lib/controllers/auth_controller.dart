@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codetrackio/screens/auth/login_or_signup_screen.dart';
-import 'package:codetrackio/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class AuthController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -100,7 +100,10 @@ class AuthGate extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasData) {
-            return const HomeScreen();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.go('/home');
+            });
+            return const SizedBox.shrink(); 
           }
           return const LoginOrSignup();
         },
