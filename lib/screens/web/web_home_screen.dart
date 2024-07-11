@@ -4,7 +4,6 @@ import 'package:codetrackio/controllers/auth_controller.dart';
 import 'package:codetrackio/screens/all_badges.dart';
 import 'package:codetrackio/screens/navbar.dart';
 import 'package:codetrackio/widgets/custom_button.dart';
-import 'package:codetrackio/widgets/rating_graph.dart';
 import 'package:codetrackio/widgets/text_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,7 +14,6 @@ import 'package:codetrackio/widgets/language_chip.dart';
 import 'package:codetrackio/widgets/platform_card.dart';
 import 'package:codetrackio/widgets/platform_name.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
@@ -822,13 +820,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              RatingGraph(),
-              ElevatedButton(
-                onPressed: () {
-                  context.go('/platforms');
-                },
-                child: Text('PlatformUrl'),
-              ),
+              // RatingGraph(),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     context.go('/platforms');
+              //   },
+              //   child: Text('PlatformUrl'),
+              // ),
             ],
           ),
         ),
