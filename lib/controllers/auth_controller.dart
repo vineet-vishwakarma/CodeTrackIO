@@ -100,10 +100,20 @@ class AuthGate extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasData) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.go('/home');
-            });
-            return const SizedBox.shrink(); 
+            final user = snapshot.data;
+            if (user != null) {
+              // Check if the user is newly created (i.e., signed up)
+              if (user.metadata.creationTime == user.metadata.lastSignInTime) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  context.go('/platforms');
+                });
+              } else {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  context.go('/home');
+                });
+              }
+            }
+            return const SizedBox.shrink();
           }
           return const LoginOrSignup();
         },
